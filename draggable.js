@@ -1,5 +1,5 @@
 let docbody=document.getRootNode();
-/*function updatePosition(event){
+/*function updatePosition(event, target){
     console.log('move target ==', event.target);
     const x=event.clientX;
     const y=event.clientY;
@@ -9,19 +9,20 @@ let docbody=document.getRootNode();
 }*/
 function createUpdatePositionFunction(eventTarget){
     const toReturn=function(event){
+            event.preventDefault();
             eventTarget.style.left=`${event.clientX}px`;
             eventTarget.style.top=`${event.clientY}px`;
+            //console.log('this is running');
 
     }
     return toReturn;
 }
-function clearListeners(){
-    /*getEventListeners(docbody).mousemove=null;
-    getEventListeners(docbody).mouseup=null;*/
-    const allchildren=Array.from(docbody.children);
-    docbody=docbody.cloneNode(false);
-    allchildren.forEach(el=>docbody.appendChild(el));
-    setInitialListener();
+function createClearListenerFunction(eventname, listenerEl){
+   const returnable=function(){
+       docbody.removeEventListener(eventname, listenerEl);
+       docbody.removeEventListener('mouseup', returnable);
+   }
+   return returnable;
 }
 
 
@@ -30,7 +31,8 @@ docbody.addEventListener('mousedown', function(event){
     if(event.target.classList.contains('draggable-item')){
         const updatePosition=createUpdatePositionFunction(event.target);
         docbody.addEventListener('mousemove', updatePosition);
-        docbody.addEventListener('mouseup', clearListeners);
+        const clearing=createClearListenerFunction('mousemove', updatePosition);
+        docbody.addEventListener('mouseup', clearing);
     }
 });
 }
